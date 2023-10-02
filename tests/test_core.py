@@ -1,10 +1,9 @@
-import pytest 
+import pytest
 
-from cmd_parser.core import asdict, parse 
+from cmd_parser.core import asdict, parse
 
 
 class TestParser:
-    
     @pytest.fixture(autouse=True)
     def setup(self) -> None:
         self.command = '!command arg1 arg2 param1=value1 param2=value2'
@@ -22,3 +21,23 @@ class TestParser:
             'kwargs': {'param1': 'value1', 'param2': 'value2'},
         }
         assert result, expected
+
+
+@pytest.mark.parametrize(
+    'input_test,expected',
+    [
+        ('param="value', 'No closing quotation'),
+        ('.', "No handler for the token -> '.'"),
+        ('-', "No handler for the token -> '-'"),
+        # ('1', "No handler for the token -> '1'"),
+        # (' ', "??"), # TODO
+        # ('', "??"), # TODO
+        # (0, "??"), # TODO
+    ],
+)
+def test_should_catch_value_erro_exception_for_malformed_inputs(
+    input_test, expected
+):
+    with pytest.raises(expected_exception=ValueError, match=expected) as exc:
+        asdict(parse(input_test))
+    assert str(exc.value) == expected
