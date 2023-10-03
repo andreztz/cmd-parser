@@ -40,7 +40,7 @@ class ArgsHandler(AbstractTokenHandler):
 
 
 class KwargsHandler(AbstractTokenHandler):
-    pattern = r'([a-z_]+[0-9_]+)=(?:[\"\'])?([a-zA-Z0-9_\s]+)(?:[\"\'])?'
+    pattern = r'([a-z_]+[0-9_]?+)=(?:[\"\'])?([a-zA-Z0-9_\s]+)(?:[\"\'])?'
     kind = 'kwargs'
 
 
