@@ -20,7 +20,7 @@ class TestParser:
             'args': ['arg1', 'arg2'],
             'kwargs': {'param1': 'value1', 'param2': 'value2'},
         }
-        assert result, expected
+        assert result == expected
 
 
 @pytest.mark.parametrize(
@@ -29,10 +29,6 @@ class TestParser:
         ('param="value', 'No closing quotation'),
         ('.', "No handler for the token -> '.'"),
         ('-', "No handler for the token -> '-'"),
-        # ('1', "No handler for the token -> '1'"),
-        # (' ', "??"), # TODO
-        # ('', "??"), # TODO
-        # (0, "??"), # TODO
     ],
 )
 def test_should_catch_value_erro_exception_for_malformed_inputs(
