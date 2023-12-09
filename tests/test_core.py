@@ -50,3 +50,9 @@ def test_given_named_param_as_input_it_should_return_valid_kwargs_dict():
     expected = {'command': None, 'args': [], 'kwargs': {'param': 'value'}}
     result = asdict(parse(input_test))
     assert result == expected
+
+def test_url_as_input():
+    input_test = '!command url="https://www.site.fake"'
+    expected = {"command": "command", 'args': [], "kwargs": {"url": "https://www.site.fake"}}
+    result = asdict(parse(input_test))
+    assert result == expected
