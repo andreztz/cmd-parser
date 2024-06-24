@@ -1,9 +1,27 @@
 import re
 import shlex
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Iterator, Match
 from copy import copy
 from functools import singledispatch
+
+
+def boolify(value):
+    if value == 'True':
+        return True
+    elif value == 'False':
+        return False
+    raise ValueError(f"Expected 'True' or 'False' for '{value}'.")
+
+
+def cast(value):
+    for fn in [boolify, int, float, str]:
+        try:
+            value = fn(value)
+        except ValueError:
+            continue
+        else:
+            return value
 
 
 class AbstractTokenHandler(ABC):
@@ -24,25 +42,42 @@ class AbstractTokenHandler(ABC):
         else:
             return self.next.handle(token)
 
+    @property
+    @abstractmethod
+    def found(self):
+        pass
+
 
 class NoHandler(AbstractTokenHandler):
     kind = 'default'
-
+    @property
+    def found(self):
+        return None
 
 class CommandHandler(AbstractTokenHandler):
     pattern = r'(?:!|:)([a-z]+[0-9_]?+)'
     kind = 'command'
+
+    @property
+    def found(self):
+        return self.matches.group(1)
 
 
 class ArgsHandler(AbstractTokenHandler):
     pattern = r'([a-zA-Z0-9_\s]+)'
     kind = 'args'
 
+    @property
+    def found(self):
+        return self.matches.group(1)
 
 class KwargsHandler(AbstractTokenHandler):
     pattern = r'([a-z_]+[0-9_]?+)=(?:[\"\'])?([a-zA-Z0-9_\s\:\/\.]+)(?:[\"\'])?'
     kind = 'kwargs'
 
+    @property
+    def found(self):
+        return {self.matches.group(1): cast(self.matches.group(2))}
 
 def handler_factory():
     no_handler = NoHandler(next_handler=None)
@@ -61,17 +96,15 @@ def asdict(parser: Iterator) -> dict:
 
     @dispatch.register
     def _(handler: CommandHandler):
-        output[handler.kind] = handler.matches.group(1)
+        output[handler.kind] = handler.found
 
     @dispatch.register
     def _(handler: ArgsHandler):
-        output[handler.kind].append(handler.matches.group(1))
+        output[handler.kind].append(handler.found)
 
     @dispatch.register
     def _(handler: KwargsHandler):
-        output[handler.kind][handler.matches.group(1)] = handler.matches.group(
-            2
-        )
+        output[handler.kind].update(handler.found)
 
     for handler in parser:
         dispatch(handler)
