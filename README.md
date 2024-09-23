@@ -28,7 +28,7 @@ Here's a quick example of how to use the library:
 ```python
 from cmd_parser.core import asdict, parse
 
-command_string = '!command arg1 arg2 param1="value1 test" param2=value2'
+command_string = '!command arg1 arg2 param=True param1=1 param2=.2'
 parsed_command = parse(command_string)
 print(asdict(parsed_command))
 ```
@@ -40,8 +40,9 @@ This will output:
     'command': 'command',
     'args': ['arg1', 'arg2'],
     'kwargs': {
-        'param1': 'value1 test',
-        'param2': 'value2'
+        'param': True,
+        'param1': 1,
+        'param2': 0.2,
     }
 }
 ```
