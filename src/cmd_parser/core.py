@@ -1,15 +1,15 @@
 import re
 import shlex
 from abc import ABC, abstractmethod
-from typing import Iterator, Match
 from copy import copy
 from functools import singledispatch
+from typing import Iterator, Match
 
 
 def boolify(value):
-    if value == 'True':
+    if value == "True":
         return True
-    elif value == 'False':
+    elif value == "False":
         return False
     raise ValueError(f"Expected 'True' or 'False' for '{value}'.")
 
@@ -25,10 +25,9 @@ def cast(value):
 
 
 class AbstractTokenHandler(ABC):
-
-    kind = ''
+    kind = ""
     matches: Match[str]
-    pattern = ''
+    pattern = ""
     token = None
 
     def __init__(self, next_handler):
@@ -49,14 +48,16 @@ class AbstractTokenHandler(ABC):
 
 
 class NoHandler(AbstractTokenHandler):
-    kind = 'default'
+    kind = "default"
+
     @property
     def found(self):
         return None
 
+
 class CommandHandler(AbstractTokenHandler):
-    pattern = r'(?:!|:)([a-z]+[0-9_]?+)'
-    kind = 'command'
+    pattern = r"(?:!|:)([a-z]+[0-9_]?+)"
+    kind = "command"
 
     @property
     def found(self):
@@ -64,20 +65,24 @@ class CommandHandler(AbstractTokenHandler):
 
 
 class ArgsHandler(AbstractTokenHandler):
-    pattern = r'([a-zA-Z0-9_\s]+)'
-    kind = 'args'
+    pattern = r"([a-zA-Z0-9_\s]+)"
+    kind = "args"
 
     @property
     def found(self):
         return self.matches.group(1)
 
+
 class KwargsHandler(AbstractTokenHandler):
-    pattern = r'([a-z_]+[0-9_]?+)=(?:[\"\'])?([a-zA-Z0-9_\s\:\/\.]+)(?:[\"\'])?'
-    kind = 'kwargs'
+    pattern = (
+        r"([a-z_]+[0-9_]?+)=(?:[\"\'])?([a-zA-Z0-9_\s\:\/\.]+)(?:[\"\'])?"
+    )
+    kind = "kwargs"
 
     @property
     def found(self):
         return {self.matches.group(1): cast(self.matches.group(2))}
+
 
 def handler_factory():
     no_handler = NoHandler(next_handler=None)
@@ -88,7 +93,7 @@ def handler_factory():
 
 
 def asdict(parser: Iterator) -> dict:
-    output = {'command': None, 'args': [], 'kwargs': {}}
+    output = {"command": None, "args": [], "kwargs": {}}
 
     @singledispatch
     def dispatch(handler):
@@ -133,5 +138,5 @@ def main():
     print(elapsed_time)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
